@@ -26,10 +26,40 @@ const App = () => {
   const geometry = new THREE.BoxGeometry(1, 1, 1)
   const material = new THREE.MeshBasicMaterial({ color: '#ff0000' })
   const mesh = new THREE.Mesh(geometry, material)
-  mesh.position.x = 0.7
-  mesh.position.y = -0.6
-  mesh.position.z = 1
   scene.add(mesh)
+
+  // move objects
+  mesh.position.set(0.7, -0.6, 1)
+
+  // scale objects
+  mesh.scale.set(2, 0.25, 0.5)
+
+  // rotate object
+  mesh.rotation.set(Math.PI * 0.25, Math.PI * 0.25, 0)
+
+  // group object
+  const group = new THREE.Group()
+  group.scale.y = 2
+  group.rotation.y = 2
+  scene.add(group)
+
+  const cube1 = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  )
+  cube1.position.x = -1.5
+  group.add(cube1)
+
+  const cube2 = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff9999 })
+  )
+  cube2.position.x = 0;
+  group.add(cube2)
+
+  const cube3 = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffaaaa })
+  )
+  cube3.position.x = 1.5
+  group.add(cube3)
 
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
   camera.position.z = 3
