@@ -8,6 +8,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
 import backImg from './assets/img/space.jpg'
 import * as lil from 'lil-gui'
+import { Raycaster } from 'three'
 
 const gui = new lil.GUI()
 
@@ -37,14 +38,55 @@ const App = () => {
 
   const controls = new OrbitControls(camera, renderer.domElement)
 
+  const obj1 = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  )
+  obj1.position.x = -2
+  const obj2 = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  )
+  const obj3 = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  )
+  obj3.position.x = 2
+
+  scene.add(obj1, obj2, obj3)
+
+  /* create raycaster */
+  const raycaster = new THREE.Raycaster()
+
+  const rayOrigin = new THREE.Vector3(-3, 0, 0)
+  const rayDirection = new THREE.Vector3(1, 0, 0)
+  rayDirection.normalize()
+
+  raycaster.set(rayOrigin, rayDirection)
+
+  const intersect = raycaster.intersectObject(obj2)
+  console.log(intersect)
+
+  const intersects = raycaster.intersectObjects([obj1, obj2, obj3])
+  console.log(intersects)
+
   const clock = new THREE.Clock();
   const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
-    // update camera
-    // camera.position.x = cursor.x
-    // camera.position.y = cursor.y
+    // animate object
+    obj1.position.y = Math.sin(elapsedTime * 0.3) * 1.5
+    obj2.position.y = Math.sin(elapsedTime * 0.8) * 1.5
+    obj3.position.y = Math.sin(elapsedTime * 1.4) * 1.5
 
+    // cast a ray
+    const rayOrigin = new THREE.Vector3(-3, 0, 0)
+    const rayDirection = new THREE.Vector3(1, 0, 0)
+    rayDirection.normalize()
+
+    raycaster.set(rayOrigin, rayDirection)
+
+    const objectToTest = [obj1, obj2, obj3]
+    const intersects = raycaster.intersectObjects(objectToTest)
+
+    console.log(intersects)
     controls.update()
 
     // Render
@@ -54,61 +96,6 @@ const App = () => {
     window.requestAnimationFrame(tick)
   }
   tick()
-
-  const parameters = {
-    count: 1000,
-    size: 0.02,
-    radius: 5,
-    branches: 3,
-    spin: 1,
-  }
-
-  let geometry: THREE.BufferGeometry
-  let material: THREE.PointsMaterial
-  let points: THREE.Points
-  const generateGalaxy = () => {
-    // destroy old galaxy
-    if(points != undefined) {
-      geometry.dispose()
-      material.dispose()
-      scene.remove(points)
-    }
-    // Geometry
-    geometry = new THREE.BufferGeometry()
-    const positions = new Float32Array(parameters.count * 3)
-
-    for (let i = 0; i < parameters.count; i++) {
-      const i3 = i * 3
-      const radius = Math.random() * parameters.radius
-      const spinAngle = radius * parameters.spin
-      const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
-
-      positions[i3    ] = Math.cos(branchAngle + spinAngle) * radius
-      positions[i3 + 1] = 0
-      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-    // Material
-    material = new THREE.PointsMaterial({
-      size: parameters.size,
-      sizeAttenuation: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    })
-
-    // Points
-    points = new THREE.Points(geometry, material)
-    scene.add(points)
-  }
-  generateGalaxy()
-
-  gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
-  gui.add(parameters, 'size').min(0.001).step(0.001).onFinishChange(generateGalaxy)
-  gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
-  gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
-  gui.add(parameters, 'spin').min(-5).max(5).step(0.001).onFinishChange(generateGalaxy)
 
   useEffect(() => {
     const elem = mountRef.current
